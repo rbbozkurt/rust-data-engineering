@@ -6,6 +6,9 @@ set -e
 # Rust version parameter (default to 1.74.0 if not specified)
 RUST_VERSION="${1:-1.74.0}"
 
+# Python version parameter (default to 3.10 if not specified)
+PYTHON_VERSION="${2:-3.10}"
+
 # Function to check if a command is available
 command_exists() {
     command -v "$1" &>/dev/null
@@ -68,17 +71,32 @@ ensure_pip() {
     fi
 }
 
-# Install pre-commit using pip
+# Install Pipenv
+install_pipenv() {
+    echo "Checking for Pipenv..."
+    if ! command_exists pipenv; then
+        echo "Pipenv not found. Installing Pipenv..."
+        pip3 install --user pipenv
+    else
+        echo "Pipenv is already installed."
+    fi
+    if [ ! -f Pipfile ]; then
+        echo "Creating Pipfile with Python version $PYTHON_VERSION..."
+        pipenv --python "$PYTHON_VERSION"
+    fi
+}
+
+# Install pre-commit using pipenv
 install_pre_commit() {
     echo "Installing pre-commit..."
-    pip3 install --user pre-commit
+    pipenv install pre-commit
 }
 
 # Setup pre-commit hooks from .pre-commit-config.yaml if it exists
 setup_pre_commit_hooks() {
     if [ -f .pre-commit-config.yaml ]; then
         echo "Setting up pre-commit hooks..."
-        pre-commit install
+        pipenv run pre-commit install
     else
         echo "No .pre-commit-config.yaml found. Skipping pre-commit hook setup."
     fi
@@ -90,6 +108,7 @@ main_setup() {
     install_rust_tools
     install_python3
     ensure_pip
+    install_pipenv
     install_pre_commit
     setup_pre_commit_hooks
     echo "Setup completed successfully."
