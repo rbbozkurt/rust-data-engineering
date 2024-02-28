@@ -7,7 +7,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    && apt-get autoremove -y && apt-get clean -y
 
 # Copy your setup.sh script into the container
-ADD setup.sh .
+COPY ../setup.sh /usr/local/bin/setup.sh
 
 # Make setup.sh executable
-RUN chmod +x setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
