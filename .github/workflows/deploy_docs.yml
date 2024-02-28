@@ -3,7 +3,7 @@ name: Deploy Docs
 on:
   push:
     branches:
-      - main  # Set to  default branch
+      - main  # Adjust to your default branch
 
 jobs:
   build_and_deploy:
@@ -11,6 +11,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'  # If you're using submodules
 
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
@@ -18,11 +20,27 @@ jobs:
         toolchain: stable
         override: true
 
-    - name: Generate Documentation
-      run: cargo doc --no-deps
+    - name: Generate Documentation for Each Subfolder
+      run: |
+        for dir in */; do
+          if [ -f "$dir/Cargo.toml" ]; then
+            echo "Generating documentation in $dir"
+            (cd $dir && cargo doc --no-deps)
+          else
+            echo "Skipping $dir, no Cargo.toml found"
+          fi
+        done
 
-    - name: Glue in an index
-      run: echo "<meta http-equiv=\"refresh\" content=\"0; url=rust_project_template\">" > target/doc/index.html
+    - name: Create Aggregated Documentation Index
+      run: |
+        echo "<html><head><title>Aggregated Documentation</title></head><body>" > target/doc/index.html
+        for dir in */target/doc; do
+          if [ -d "$dir" ]; then
+            project_name=$(basename $(dirname $dir))
+            echo "<a href='$project_name/index.html'>$project_name</a><br>" >> target/doc/index.html
+          fi
+        done
+        echo "</body></html>" >> target/doc/index.html
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
