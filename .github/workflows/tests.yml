@@ -7,13 +7,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          # Fetches all submodules recursively
+          submodules: 'recursive'
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
           components: clippy, rustfmt
           override: true
-      - name: Run clippy
-        run: make test
-  
+
+      # Add a step to iterate over each submodule
+      - name: Run clippy in submodules
+        run: |
+          for dir in */; do
+            if [ -d "$dir" ]; then
+              echo "Running clippy in $dir"
+              cd $dir
+              # Ensure there's a Makefile or Cargo.toml before attempting to run tests
+              if [ -f "Makefile" ]; then
+                make test
+              elif [ -f "Cargo.toml" ]; then
+                cargo clippy -- -D warnings
+              else
+                echo "No Makefile or Cargo.toml found in $dir, skipping..."
+              fi
+              cd ..
+            fi
+          done
