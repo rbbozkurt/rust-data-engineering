@@ -33,6 +33,7 @@ jobs:
 
     - name: Create Aggregated Documentation Index
       run: |
+        mkdir -p target/doc  # Ensure target/doc exists
         echo "<html><head><title>Aggregated Documentation</title></head><body>" > target/doc/index.html
         for dir in */target/doc; do
           if [ -d "$dir" ]; then
