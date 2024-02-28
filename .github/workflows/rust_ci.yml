@@ -1,19 +1,22 @@
-name: Clippy
+name: Comprehensive Rust Check
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'  # If you're using submodules
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
           components: clippy, rustfmt
           override: true
-      - name: Run clippy
-        run: make lint
-  
+
+      - name: Format, Lint, and Test
+        run: make all
