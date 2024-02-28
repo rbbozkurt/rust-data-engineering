@@ -1,0 +1,3 @@
+[submodule "rust-rest-microservice"]
+	path = rust-rest-microservice
+	url = https://github.com/rbbozkurt/rust-rest-microservice.git
