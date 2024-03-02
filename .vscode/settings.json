@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./rust-rest-microservice/Cargo.toml"
+    ]
+}
